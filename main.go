@@ -22,7 +22,7 @@ type MainStoryResult struct {
 	pages []Page
 }
 
-func createNewStory(client *openai.Client, storyNum int) error {
+func createNewStory(client *openai.Client, storyNum int, topic string) error {
 
 	if err := os.Mkdir(fmt.Sprintf("story%v", storyNum), 0666); err != nil {
 		slog.Error("Error creating directory: %v\n", err)
@@ -30,7 +30,7 @@ func createNewStory(client *openai.Client, storyNum int) error {
 	}
 
 	slog.Debug("Writing story...")
-	story, _ := createStory(client, "A story about the macronutrients.")
+	story, _ := createStory(client, topic)
 
 	// slog.Debug("Creating characters...")
 	// characters, _ := createCharacters(client, story)
@@ -114,7 +114,7 @@ func main() {
 
 	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 
-	err = createNewStory(client, 12)
+	err = createNewStory(client, 13, "A story about the macronutrients.")
 	if err != nil {
 		slog.Error("Error creating story: %v\n", err)
 		return
