@@ -55,7 +55,6 @@ func DefaultStabilityBody() StabilityBody {
 		Seed:        0,
 		CfgScale:    5,
 		Samples:     1,
-		StylePreset: "fantasy-art",
 		TextPrompts: []Prompt{posPrompt, negPrompt},
 	}
 }

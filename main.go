@@ -32,9 +32,6 @@ func createNewStory(client *openai.Client, storyNum int, topic string) error {
 	slog.Debug("Writing story...")
 	story, _ := createStory(client, topic)
 
-	// slog.Debug("Creating characters...")
-	// characters, _ := createCharacters(client, story)
-
 	slog.Debug("Splitting story into pages...")
 	pagesAndIllustraitons, _ := splitIntoPages(client, story)
 	pagesAndIllustraitons[len(pagesAndIllustraitons)-1].Text += " The End."
@@ -45,9 +42,6 @@ func createNewStory(client *openai.Client, storyNum int, topic string) error {
 		pages = append(pages, page.Text)
 		imagePrompts = append(imagePrompts, page.IllustrationDescription)
 	}
-
-	// slog.Debug("Creating illustration prompts...")
-	// imagePrompts, _ := createIllustrationDescriptions(client, pages, characters)
 
 	slog.Debug("Creating illustrations...")
 	illustrations := lo.Map(imagePrompts, func(prompt string, _ int) []byte {
@@ -74,7 +68,6 @@ func createNewStory(client *openai.Client, storyNum int, topic string) error {
 	}
 
 	slog.Debug("Creating voiceovers...")
-	// Voiceovers
 	voiceovers, err := createVoiceovers(client, pages)
 	if err != nil {
 		slog.Error("Error creating voiceovers: %v\n", err)
