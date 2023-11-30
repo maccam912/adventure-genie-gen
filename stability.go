@@ -17,13 +17,13 @@ type Prompt struct {
 }
 
 type StabilityBody struct {
-	Steps       int      `json:"steps"`
-	Width       int      `json:"width"`
-	Height      int      `json:"height"`
-	Seed        int      `json:"seed"`
-	CfgScale    int      `json:"cfg_scale"`
-	Samples     int      `json:"samples"`
-	StylePreset string   `json:"style_preset"`
+	Steps    int `json:"steps"`
+	Width    int `json:"width"`
+	Height   int `json:"height"`
+	Seed     int `json:"seed"`
+	CfgScale int `json:"cfg_scale"`
+	Samples  int `json:"samples"`
+	// StylePreset string   `json:"style_preset"`
 	TextPrompts []Prompt `json:"text_prompts"`
 }
 
@@ -49,11 +49,11 @@ func DefaultStabilityBody() StabilityBody {
 	}
 
 	return StabilityBody{
-		Steps:       40,
+		Steps:       50,
 		Width:       1024,
 		Height:      1024,
 		Seed:        0,
-		CfgScale:    5,
+		CfgScale:    8,
 		Samples:     1,
 		TextPrompts: []Prompt{posPrompt, negPrompt},
 	}

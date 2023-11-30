@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/samber/lo"
+	lop "github.com/samber/lo/parallel"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -34,17 +34,21 @@ func createNewStory(client *openai.Client, storyNum int, topic string) error {
 
 	slog.Debug("Splitting story into pages...")
 	pagesAndIllustraitons, _ := splitIntoPages(client, story)
-	pagesAndIllustraitons[len(pagesAndIllustraitons)-1].Text += " The End."
+	slog.Debug(fmt.Sprintf("pages and illustrations: %v", pagesAndIllustraitons))
 
-	pages := []string{}
-	imagePrompts := []string{}
-	for _, page := range pagesAndIllustraitons {
-		pages = append(pages, page.Text)
-		imagePrompts = append(imagePrompts, page.IllustrationDescription)
-	}
+	texts := lop.Map(pagesAndIllustraitons.Pages, func(page PageResult, _ int) string {
+		return page.Text
+	})
+	texts[len(texts)-1] += " The End."
+
+	pages := texts
+	imagePrompts := lop.Map(pagesAndIllustraitons.Pages, func(page PageResult, _ int) string {
+		response, _ := createIllustrationDescription(client, page.IllustrationDescription, pagesAndIllustraitons.IllustrationStyle, pagesAndIllustraitons.CharacterDescriptions)
+		return response
+	})
 
 	slog.Debug("Creating illustrations...")
-	illustrations := lo.Map(imagePrompts, func(prompt string, _ int) []byte {
+	illustrations := lop.Map(imagePrompts, func(prompt string, _ int) []byte {
 		illustration, _ := createIllustration(prompt)
 		return illustration
 	})
@@ -83,6 +87,10 @@ func createNewStory(client *openai.Client, storyNum int, topic string) error {
 		result.pages[i].Voiceover = fmt.Sprintf("story%v/page%v.mp3", storyNum, i+1)
 	}
 
+	for i, page := range result.pages {
+		page.IllustrationDescription = imagePrompts[i]
+	}
+
 	json_story, err := json.Marshal(result.pages)
 	if err != nil {
 		slog.Error("Error marshalling story: %v\n", err)
@@ -107,7 +115,7 @@ func main() {
 
 	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
 
-	err = createNewStory(client, 13, "A story about the macronutrients.")
+	err = createNewStory(client, 21, "")
 	if err != nil {
 		slog.Error("Error creating story: %v\n", err)
 		return
